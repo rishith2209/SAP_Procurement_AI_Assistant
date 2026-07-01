@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-sap-bg-light text-sap-gray-800 font-sans transition-colors duration-200 antialiased overflow-x-hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  html.dark body {
+    @apply bg-sap-bg-dark text-sap-gray-100;
+  }
+
+  /* Custom subtle scrollbars for enterprise look */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-sap-gray-300 rounded-full transition-colors;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb {
+    @apply bg-sap-gray-700;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-sap-gray-400;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-sap-gray-600;
+  }
+}
+
+@layer components {
+  /* Glassmorphism SAP-style Card class */
+  .fiori-card {
+    @apply bg-sap-card-light dark:bg-sap-card-dark border border-sap-border-light dark:border-sap-border-dark rounded-xl shadow-fiori dark:shadow-fiori-dark overflow-hidden transition-all duration-200;
+  }
+
+  .fiori-card-hover {
+    @apply hover:shadow-card-hover hover:border-sap-blue-medium/30 dark:hover:border-sap-blue-medium/50 hover:-translate-y-0.5;
+  }
+
+  /* SAP Table visual overrides */
+  .fiori-table-header {
+    @apply bg-sap-gray-100 dark:bg-sap-gray-800/50 text-sap-gray-600 dark:text-sap-gray-400 text-xs font-semibold uppercase tracking-wider text-left border-b border-sap-border-light dark:border-sap-border-dark;
+  }
+
+  .fiori-table-row {
+    @apply border-b border-sap-border-light dark:border-sap-border-dark hover:bg-sap-gray-50/80 dark:hover:bg-sap-gray-800/40 transition-colors duration-150;
+  }
+
+  /* Interactive Form Inputs */
+  .fiori-input {
+    @apply w-full px-3 py-2 text-sm bg-white dark:bg-sap-gray-900 border border-sap-border-light dark:border-sap-border-dark rounded-md focus:outline-none focus:ring-1 focus:ring-sap-blue-medium focus:border-sap-blue-medium dark:text-white transition-all disabled:opacity-50 disabled:bg-sap-gray-50 dark:disabled:bg-sap-gray-800;
+  }
+
+  /* Scrollable chat windows typing cursor dot */
+  .typing-dot {
+    @apply w-2 h-2 rounded-full bg-sap-gray-400 dark:bg-sap-gray-500 inline-block mx-0.5 animate-typing;
+  }
+}
+
+/* Custom visual utilities */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur-12px;
+  -webkit-backdrop-filter: blur-12px;
+}
+
+.dark .glassmorphism {
+  background: rgba(28, 42, 53, 0.8);
+  backdrop-filter: blur-12px;
+  -webkit-backdrop-filter: blur-12px;
+}
+
+.auth-gradient {
+  background: linear-gradient(135deg, #00325a 0%, #005a9e 50%, #0078d4 100%);
+}
+
+.dark .auth-gradient {
+  background: linear-gradient(135deg, #0b151e 0%, #121e28 50%, #1c2a35 100%);
+}

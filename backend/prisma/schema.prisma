@@ -1,0 +1,167 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String             @id @default(uuid())
+  email         String             @unique
+  password      String
+  name          String
+  role          String             // 'Admin' | 'Procurement Manager' | 'Finance Manager' | 'Vendor' | 'Employee'
+  department    String
+  approvalLimit Float              @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  auditLogs     AuditLog[]
+  conversations ChatConversation[]
+}
+
+model Vendor {
+  id               String          @id @default(uuid())
+  name             String
+  code             String          @unique
+  email            String
+  contact          String
+  performanceScore Int             @default(0)
+  deliveryScore    Int             @default(0)
+  riskScore        Int             @default(0)
+  totalSpend       Float           @default(0)
+  category         String
+  status           String          // 'Active' | 'Under Review' | 'Suspended'
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  purchaseOrders   PurchaseOrder[]
+  invoices         Invoice[]
+}
+
+model PurchaseOrder {
+  id           String   @id @default(uuid())
+  poNumber     String   @unique
+  vendorId     String
+  vendorName   String
+  department   String
+  amount       Float
+  status       String   // 'Draft' | 'Manager Approval' | 'Finance Approval' | 'PO Generated' | 'Vendor Accepted' | 'Delivered' | 'Invoice Received' | 'Closed'
+  deliveryDate String
+  orderDate    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  vendor       Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  items        POItem[]
+
+  @@index([vendorId])
+}
+
+model POItem {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  description     String
+  quantity        Int
+  unitPrice       Float
+  total           Float
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique
+  poNumber      String
+  vendorId      String
+  vendorName    String
+  amount        Float
+  status        String   // 'Draft' | 'Pending Approval' | 'Approved' | 'Paid' | 'Overdue' | 'Rejected'
+  issueDate     String
+  dueDate       String
+  category      String
+  fileName      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  vendor        Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model Document {
+  id          String          @id @default(uuid())
+  name        String
+  size        String
+  type        String
+  category    String          // 'Purchase Orders' | 'Invoices' | 'Vendors' | 'Reports' | 'Unsorted'
+  uploadedAt  String
+  status      String          // 'Processed' | 'Processing' | 'Failed'
+  url         String?
+  contentHash String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  chunks      DocumentChunk[]
+}
+
+model DocumentChunk {
+  id         String   @id @default(uuid())
+  documentId String
+  pageNumber Int
+  section    String
+  text       String
+  vector     Float[]  // Native Postgres Array of Floats for Vector embeddings
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model ChatConversation {
+  id            String        @id @default(uuid())
+  userId        String
+  title         String
+  lastMessageAt DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      ChatMessage[]
+
+  @@index([userId])
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid())
+  conversationId String
+  role           String           // 'user' | 'assistant'
+  content        String
+  timestamp      DateTime         @default(now())
+  suggestions    String[]
+  attachments    Json?            // Array of attachments
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  username  String   @default("System")
+  action    String
+  category  String
+  details   String
+  timestamp DateTime @default(now())
+  ipAddress String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  name       String
+  type       String
+  department String
+  format     String
+  size       String
+  createdBy  String
+  createdAt  DateTime @default(now())
+  url        String?
+}

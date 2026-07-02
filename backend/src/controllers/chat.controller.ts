@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { prisma } from '../config/db.js';
-import { aiServiceInstance } from '../services/ai.service.js';
+import { coPilotServiceInstance } from '../services/copilot.service.js';
 import { ragServiceInstance } from '../services/rag.service.js';
 import { logAudit } from '../utils/audit.js';
 
@@ -68,7 +68,6 @@ export const sendMessage = async (
       return;
     }
 
-    // 1. Save user message to database
     const userMsg = await prisma.chatMessage.create({
       data: {
         conversationId,
@@ -78,7 +77,7 @@ export const sendMessage = async (
       }
     });
 
-    // Auto-update conversation title if default
+    // Auto-update title if it's default
     if (conversation.title === 'New Inquiry') {
       const parsedTitle = content.length > 28 ? content.slice(0, 25) + '...' : content;
       await prisma.chatConversation.update({
@@ -114,25 +113,23 @@ export const sendMessage = async (
       suggestions = ['Explain SOX controls', 'What is the Director approval limit?', 'Vetting process guidelines'];
     }
 
-    // 3. Search RAG Document indexes from database chunks
+    // 3. Search Retrieval Document indexes from database chunks
     const matches = await ragServiceInstance.searchIndex(content, 3);
     
-    // 4. Build prompt combining prompt instructions, contexts, and user query
+    // 4. Build prompt
     let assembledPrompt = `
-You are the SAP Procurement AI Co-pilot, an expert AI assistant integrated into a Fortune 500 company's S/4HANA ERP instance.
+You are the SAP Procurement Co-pilot, an expert assistant integrated into a Fortune 500 company's S/4HANA ERP instance.
 
 Format all responses using professional Markdown with clear lists, headings, and tables. Highlight alerts using emojis.
 `;
 
-    // Ingest chunks context
     if (matches.length > 0) {
-      assembledPrompt += `\n### 📄 RETRIEVED DOCUMENT CONTEXT (RAG):\n`;
+      assembledPrompt += `\n### 📄 RETRIEVED DOCUMENT CONTEXT:\n`;
       matches.forEach((m, idx) => {
         assembledPrompt += `SOURCE [${idx + 1}]: "${m.chunk.filename}" (Page ${m.chunk.pageNumber}, Section: "${m.chunk.section}", Confidence: ${(m.score * 100).toFixed(0)}%)\n"""\n${m.chunk.text}\n"""\n\n`;
       });
     }
 
-    // Ingest database records context
     if (erpContext) {
       assembledPrompt += `\n### 📊 S/4HANA ERP DATABASE RECORDS CONTEXT:\n${erpContext}\n\n`;
     }
@@ -148,14 +145,14 @@ USER INQUIRY:
     }));
 
     // 6. Query model
-    const aiResponseText = await aiServiceInstance.sendMessage(
+    const responseText = await coPilotServiceInstance.sendMessage(
       assembledPrompt,
       history,
-      'You are the SAP Procurement AI Co-pilot assistant.'
+      'You are the SAP Procurement Co-pilot assistant.'
     );
 
     // 7. Format matched citations into response markdown
-    let finalContent = aiResponseText;
+    let finalContent = responseText;
     if (matches.length > 0) {
       finalContent += `\n\n---\n### 📚 Referenced S/4HANA Document Sources:\n`;
       matches.forEach((m, idx) => {
@@ -165,7 +162,7 @@ USER INQUIRY:
       });
     }
 
-    // 8. Save AI response to DB
+    // 8. Save response to DB
     const aiMsg = await prisma.chatMessage.create({
       data: {
         conversationId,
@@ -175,18 +172,16 @@ USER INQUIRY:
       }
     });
 
-    // Update conversation timestamp
     await prisma.chatConversation.update({
       where: { id: conversationId },
       data: { lastMessageAt: new Date() }
     });
 
-    // Write audit log
     await logAudit(
       req.user.id,
       req.user.name,
-      'AI Assistant Inquiry',
-      'AI Assistant',
+      'Co-pilot Assistant Inquiry',
+      'Co-pilot',
       `User queried co-pilot thread: "${content.slice(0, 45)}...". Returned ${matches.length} citations.`,
       req.ip
     );

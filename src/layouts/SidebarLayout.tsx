@@ -56,7 +56,7 @@ export const SidebarLayout: React.FC = () => {
     { name: 'Invoices', path: '/invoices', icon: CreditCard },
     { name: 'Vendors', path: '/vendors', icon: Users },
     { name: 'Document Center', path: '/documents', icon: FolderOpen },
-    { name: 'AI Assistant', path: '/ai-assistant', icon: MessageSquare, primary: true },
+    { name: 'Co-pilot', path: '/ai-assistant', icon: MessageSquare, primary: true },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
     { name: 'Profile', path: '/profile', icon: User },
@@ -87,7 +87,7 @@ export const SidebarLayout: React.FC = () => {
             </div>
             <div>
               <h1 className="text-sm font-bold text-sap-gray-800 dark:text-white leading-none">SAP Procurement</h1>
-              <span className="text-[10px] text-sap-accent font-bold uppercase tracking-wider">AI Assistant</span>
+              <span className="text-[10px] text-sap-accent font-bold uppercase tracking-wider">Co-pilot</span>
             </div>
           </div>
         </div>
@@ -152,7 +152,7 @@ export const SidebarLayout: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-sm font-bold text-sap-gray-800 dark:text-white leading-none">SAP Procurement</h1>
-                  <span className="text-[10px] text-sap-accent font-bold uppercase">AI Assistant</span>
+                  <span className="text-[10px] text-sap-accent font-bold uppercase">Co-pilot</span>
                 </div>
               </div>
               <button

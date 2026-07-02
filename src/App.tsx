@@ -20,7 +20,7 @@ import { PurchaseOrdersPage } from './features/purchase-orders/PurchaseOrdersPag
 import { InvoicesPage } from './features/invoices/InvoicesPage';
 import { VendorsPage } from './features/vendors/VendorsPage';
 import { DocumentsPage } from './features/documents/DocumentsPage';
-import { AIAssistantPage } from './features/ai-assistant/AIAssistantPage';
+import { CoPilotPage } from './features/copilot/CoPilotPage';
 import { AnalyticsPage } from './features/analytics/AnalyticsPage';
 import { ReportsPage } from './features/reports/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -74,7 +74,7 @@ export default function App() {
                   <Route path="/invoices" element={<InvoicesPage />} />
                   <Route path="/vendors" element={<VendorsPage />} />
                   <Route path="/documents" element={<DocumentsPage />} />
-                  <Route path="/ai-assistant" element={<AIAssistantPage />} />
+                  <Route path="/ai-assistant" element={<CoPilotPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />

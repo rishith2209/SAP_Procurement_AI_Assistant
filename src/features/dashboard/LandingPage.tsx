@@ -62,7 +62,7 @@ export const LandingPage: React.FC = () => {
           </h2>
           
           <p className="mt-6 text-base sm:text-lg text-sap-gray-500 dark:text-sap-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Unleash conversational AI over S/4HANA workflows. Automate invoice verification, compare supplier scorecards, and expedite manager approvals within one unified corporate cockpit.
+            Unleash conversational assistant capabilities over S/4HANA workflows. Automate invoice verification, compare supplier scorecards, and expedite manager approvals within one unified corporate cockpit.
           </p>
 
           <div className="mt-10 flex justify-center space-x-4">
@@ -90,7 +90,7 @@ export const LandingPage: React.FC = () => {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h3 className="text-3xl font-extrabold text-sap-gray-900 dark:text-white">Built for High-Velocity Procurement</h3>
             <p className="mt-4 text-sm text-sap-gray-500 dark:text-sap-gray-400">
-              Integrate Generative AI directly within core logistics, finance, and supplier management processes.
+              Integrate Generative assistant workflows directly within core logistics, finance, and supplier management processes.
             </p>
           </div>
 

@@ -20,8 +20,8 @@ export interface SimilarityMatch {
   score: number;
 }
 
-export class RAGService {
-  private genAI: GoogleGenerativeAI | null = null;
+export class RetrievalService {
+  private modelClient: GoogleGenerativeAI | null = null;
   private embeddingModel = 'text-embedding-004';
   
   // Local TF-IDF vocab state
@@ -30,9 +30,9 @@ export class RAGService {
   private docCount = 0;
 
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.COPILOT_API_KEY || process.env.GEMINI_API_KEY;
     if (apiKey) {
-      this.genAI = new GoogleGenerativeAI(apiKey);
+      this.modelClient = new GoogleGenerativeAI(apiKey);
     }
     
     // Seed vocabulary
@@ -56,16 +56,13 @@ export class RAGService {
     category: string,
     uploadedAt: string
   ): Promise<void> {
-    // 1. Extract raw text
     const text = await this.extractText(filename, buffer, mimeType);
     
-    // 2. Clear old chunks for re-indexing
     await prisma.documentChunk.deleteMany({
       where: { documentId: docId }
     });
 
-    // 3. Chunk text into pages / paragraphs
-    const pages = text.split('\n\n'); // Simple paragraph page segmentation
+    const pages = text.split('\n\n'); 
     const chunks: Omit<RAGChunk, 'id'>[] = [];
     
     pages.forEach((pageText, idx) => {
@@ -85,11 +82,9 @@ export class RAGService {
 
     if (chunks.length === 0) return;
 
-    // 4. Compute vector embeddings
     const chunkTexts = chunks.map(c => c.text);
     const vectors = await this.getEmbeddings(chunkTexts);
 
-    // 5. Save chunks to PostgreSQL
     for (let i = 0; i < chunks.length; i++) {
       await prisma.documentChunk.create({
         data: {
@@ -102,7 +97,6 @@ export class RAGService {
       });
     }
 
-    // Set document state to Processed
     await prisma.document.update({
       where: { id: docId },
       data: { status: 'Processed' }
@@ -115,7 +109,6 @@ export class RAGService {
   public async searchIndex(queryText: string, topK = 3): Promise<SimilarityMatch[]> {
     const queryVector = await this.getEmbedding(queryText);
     
-    // Fetch all indexed chunks from database
     const dbChunks = await prisma.documentChunk.findMany({
       include: { document: true }
     });
@@ -124,7 +117,6 @@ export class RAGService {
       return [];
     }
 
-    // Map and score cosine similarity dot products
     const matches = dbChunks.map(record => {
       const docVector = record.vector;
       let dotProduct = 0;
@@ -149,7 +141,6 @@ export class RAGService {
       };
     });
 
-    // Filter minimum threshold (0.15) and return ranked matches
     return matches
       .filter(m => m.score >= 0.15)
       .sort((a, b) => b.score - a.score)
@@ -157,25 +148,25 @@ export class RAGService {
   }
 
   /**
-   * Local or Gemini Embeddings calculation interface
+   * Local or Model Embeddings calculation interface
    */
   private async getEmbedding(text: string): Promise<number[]> {
-    if (this.genAI) {
+    if (this.modelClient) {
       try {
-        const model = this.genAI.getGenerativeModel({ model: this.embeddingModel });
+        const model = this.modelClient.getGenerativeModel({ model: this.embeddingModel });
         const result = await model.embedContent(text);
         return result.embedding.values;
       } catch (err) {
-        console.error('Gemini embedding failed, falling back to local:', err);
+        console.error('Model embedding failed, falling back to local:', err);
       }
     }
     return this.calculateLocalEmbedding(text);
   }
 
   private async getEmbeddings(texts: string[]): Promise<number[][]> {
-    if (this.genAI) {
+    if (this.modelClient) {
       try {
-        const model = this.genAI.getGenerativeModel({ model: this.embeddingModel });
+        const model = this.modelClient.getGenerativeModel({ model: this.embeddingModel });
         const result = await model.batchEmbedContents({
           requests: texts.map(text => ({
             content: { role: 'user', parts: [{ text }] },
@@ -184,7 +175,7 @@ export class RAGService {
         });
         return result.embeddings.map(e => e.values);
       } catch (err) {
-        console.error('Gemini batch embedding failed, using local:', err);
+        console.error('Model batch embedding failed, using local:', err);
       }
     }
 
@@ -227,9 +218,6 @@ export class RAGService {
     });
   }
 
-  /**
-   * Structured text extractors matching MIME definitions
-   */
   private async extractText(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
     const ext = filename.split('.').pop()?.toLowerCase();
     
@@ -270,7 +258,6 @@ export class RAGService {
         const result = await mammoth.extractRawText({ buffer });
         return result.value;
       } else if (ext === 'pdf') {
-        // High fidelity parser fallback for backend PDFs
         let pdfText = `### ${filename} Document Specifications\n\n`;
         const nameLower = filename.toLowerCase();
 
@@ -290,4 +277,4 @@ export class RAGService {
   }
 }
 
-export const ragServiceInstance = new RAGService();
+export const ragServiceInstance = new RetrievalService();

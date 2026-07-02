@@ -113,7 +113,7 @@ export const DashboardPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
         <div>
           <h2 className="text-2xl font-bold text-sap-gray-800 dark:text-white">Enterprise Cockpit</h2>
-          <p className="text-xs text-sap-gray-500 dark:text-sap-gray-400">ERP S/4HANA transactional review & AI insights</p>
+          <p className="text-xs text-sap-gray-500 dark:text-sap-gray-400">ERP S/4HANA transactional review & smart insights</p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -155,7 +155,7 @@ export const DashboardPage: React.FC = () => {
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs text-sap-gray-500 dark:text-sap-gray-400 font-semibold uppercase tracking-wider">AI Negotiated Savings</p>
+            <p className="text-xs text-sap-gray-500 dark:text-sap-gray-400 font-semibold uppercase tracking-wider">Negotiated Savings Secured</p>
             <h3 className="text-lg font-extrabold text-sap-gray-800 dark:text-white mt-1">${kpis.costSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
             <span className="text-[10px] text-sap-status-success-text font-bold flex items-center mt-1">
               {kpis.savingsRate}% overall savings rate
@@ -248,11 +248,11 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* AI Insights Recommendations */}
+      {/* Smart Recommendations */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
           <Bot className="w-5 h-5 text-sap-accent" />
-          <h3 className="text-sm font-bold text-sap-gray-800 dark:text-white">Active AI Recommendation Feed</h3>
+          <h3 className="text-sm font-bold text-sap-gray-800 dark:text-white">Active Co-pilot Recommendation Feed</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {insights.map((ins: any) => (

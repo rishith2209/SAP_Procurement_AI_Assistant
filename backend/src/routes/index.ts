@@ -65,7 +65,7 @@ router.delete('/documents/:id', authenticateToken, docController.deleteDocument)
 router.post('/documents/:id/reindex', authenticateToken, docController.reindexDocument);
 
 // ==========================================
-// 6. AI Assistant Chat Routes
+// 6. Co-pilot Assistant Chat Routes
 // ==========================================
 router.get('/chats/conversations', authenticateToken, chatController.getConversations);
 router.post('/chats/conversations', authenticateToken, chatController.createConversation);
